@@ -1,0 +1,7 @@
+tests:
+  image: gitlab.k-net.fr:1234/docker/kdo-php7:master
+  stage: test
+  script:
+     - composer install -o
+     - cat phpunit.xml.dist|sed s/__TEST_ENDPOINT__/${TEST_ENDPOINT}/|sed s/__TEST_ACCESSKEY__/${TEST_ACCESSKEY}/|sed s/__TEST_SECRETKEY__/${TEST_SECRETKEY}/ > phpunit.xml
+     - vendor/bin/phpunit --testdox
