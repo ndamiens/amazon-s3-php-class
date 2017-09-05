@@ -498,7 +498,7 @@ class S3
 		if ($maxKeys == null && $nextMarker !== null && (string)$response->body->IsTruncated == 'true')
 		do
 		{
-			$rest = new S3Request('GET', $bucket, '', self::$endpoint);
+			$rest = new S3Request('GET', $bucket, '', self::$endpoint, self::$requestOptions);
 			if ($prefix !== null && $prefix !== '') $rest->setParameter('prefix', $prefix);
 			$rest->setParameter('marker', $nextMarker);
 			if ($delimiter !== null && $delimiter !== '') $rest->setParameter('delimiter', $delimiter);
@@ -956,7 +956,7 @@ class S3
 		}
 		$dom->appendChild($bucketLoggingStatus);
 
-		$rest = new S3Request('PUT', $bucket, '', self::$endpoint);
+		$rest = new S3Request('PUT', $bucket, '', self::$endpoint, self::$requestOptions);
 		$rest->setParameter('logging', null);
 		$rest->data = $dom->saveXML();
 		$rest->size = strlen($rest->data);
@@ -985,7 +985,7 @@ class S3
 	*/
 	public static function getBucketLogging($bucket)
 	{
-		$rest = new S3Request('GET', $bucket, '', self::$endpoint);
+		$rest = new S3Request('GET', $bucket, '', self::$endpoint, self::$requestOptions);
 		$rest->setParameter('logging', null);
 		$rest = $rest->getResponse();
 		if ($rest->error === false && $rest->code !== 200)
@@ -1024,7 +1024,7 @@ class S3
 	*/
 	public static function getBucketLocation($bucket)
 	{
-		$rest = new S3Request('GET', $bucket, '', self::$endpoint);
+		$rest = new S3Request('GET', $bucket, '', self::$endpoint, self::$requestOptions);
 		$rest->setParameter('location', null);
 		$rest = $rest->getResponse();
 		if ($rest->error === false && $rest->code !== 200)
@@ -1088,7 +1088,7 @@ class S3
 		$accessControlPolicy->appendChild($accessControlList);
 		$dom->appendChild($accessControlPolicy);
 
-		$rest = new S3Request('PUT', $bucket, $uri, self::$endpoint);
+		$rest = new S3Request('PUT', $bucket, $uri, self::$endpoint, self::$requestOptions);
 		$rest->setParameter('acl', null);
 		$rest->data = $dom->saveXML();
 		$rest->size = strlen($rest->data);
@@ -1115,7 +1115,7 @@ class S3
 	*/
 	public static function getAccessControlPolicy($bucket, $uri = '')
 	{
-		$rest = new S3Request('GET', $bucket, $uri, self::$endpoint);
+		$rest = new S3Request('GET', $bucket, $uri, self::$endpoint, self::$requestOptions);
 		$rest->setParameter('acl', null);
 		$rest = $rest->getResponse();
 		if ($rest->error === false && $rest->code !== 200)
@@ -1850,7 +1850,7 @@ class S3
 			'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif',
 			'png' => 'image/png', 'ico' => 'image/x-icon', 'pdf' => 'application/pdf',
 			'tif' => 'image/tiff', 'tiff' => 'image/tiff', 'svg' => 'image/svg+xml',
-			'svgz' => 'image/svg+xml', 'swf' => 'application/x-shockwave-flash', 
+			'svgz' => 'image/svg+xml', 'swf' => 'application/x-shockwave-flash',
 			'zip' => 'application/zip', 'gz' => 'application/x-gzip',
 			'tar' => 'application/x-tar', 'bz' => 'application/x-bzip',
 			'bz2' => 'application/x-bzip2',  'rar' => 'application/x-rar-compressed',
