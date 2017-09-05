@@ -452,7 +452,7 @@ class S3
 	*/
 	public static function getBucket($bucket, $prefix = null, $marker = null, $maxKeys = null, $delimiter = null, $returnCommonPrefixes = false)
 	{
-		$rest = new S3Request('GET', $bucket, '', self::$endpoint);
+		$rest = new S3Request('GET', $bucket, '', self::$endpoint, self::$requestOptions);
 		if ($maxKeys == 0) $maxKeys = null;
 		if ($prefix !== null && $prefix !== '') $rest->setParameter('prefix', $prefix);
 		if ($marker !== null && $marker !== '') $rest->setParameter('marker', $marker);
