@@ -107,7 +107,7 @@ final class S3Request
 	/**
 	 * Use HTTP PUT?
 	 *
-	 * @var bool
+	 * @var resource|bool
 	 * @access public
 	 */
 	public $fp = false;
@@ -123,7 +123,7 @@ final class S3Request
 	/**
 	 * PUT post fields
 	 *
-	 * @var array
+	 * @var string
 	 * @access public
 	 */
 	public $data = false;
@@ -136,6 +136,13 @@ final class S3Request
 	 */
 	public $response;
 
+	/**
+	 * used if we've downloaded an object (path to it)
+	 *
+	 * @var string
+	 * @access public
+	 */
+	public $file;
 
 	/**
 	* Constructor
@@ -199,10 +206,10 @@ final class S3Request
 	* Set request parameter
 	*
 	* @param string $key Key
-	* @param string $value Value
+	* @param string|null $value Value
 	* @return void
 	*/
-	public function setParameter($key, $value)
+	public function setParameter($key, $value = null)
 	{
 		$this->parameters[$key] = $value;
 	}

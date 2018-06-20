@@ -44,7 +44,7 @@ class S3Exception extends Exception {
 	 *
 	 * @param string $message Exception message
 	 * @param string $file File in which exception was created
-	 * @param string $line Line number on which exception was created
+	 * @param int $line Line number on which exception was created
 	 * @param int $code Exception code
 	 */
 	function __construct($message, $file, $line, $code = 0)
