@@ -35,7 +35,6 @@ use DOMDocument;
 * Amazon S3 PHP class
 *
 * @link http://undesigned.org.za/2007/10/22/amazon-s3-php-class
-* @version 0.5.1
 */
 class S3
 {
@@ -126,7 +125,7 @@ class S3
 	/**
 	 * Use SSL version
 	 *
-	 * @var const
+	 * @var int
 	 * @access public
 	 * @static
 	 */
@@ -151,7 +150,7 @@ class S3
 	/**
 	 * SSL client key
 	 *
-	 * @var bool
+	 * @var string|null
 	 * @access public
 	 * @static
 	 */
@@ -160,7 +159,7 @@ class S3
 	/**
 	 * SSL client certfificate
 	 *
-	 * @var string
+	 * @var string|null
 	 * @acess public
 	 * @static
 	 */
@@ -169,7 +168,7 @@ class S3
 	/**
 	 * SSL CA cert (only required if you are having problems with your system CA cert)
 	 *
-	 * @var string
+	 * @var string|null
 	 * @access public
 	 * @static
 	 */
@@ -178,7 +177,7 @@ class S3
 	/**
 	 * AWS Key Pair ID
 	 *
-	 * @var string
+	 * @var string|null
 	 * @access private
 	 * @static
 	 */
@@ -196,7 +195,7 @@ class S3
 	/**
 	 * S3Request options
 	 *
-	 * @var bool
+	 * @var array
 	 * @access public
 	 * @static
 	 */
@@ -304,7 +303,7 @@ class S3
 	* @param string $host Proxy hostname and port (localhost:1234)
 	* @param string $user Proxy username
 	* @param string $pass Proxy password
-	* @param constant $type CURL proxy type
+	* @param int $type CURL proxy type
 	* @return void
 	*/
 	public static function setProxy($host, $user = null, $pass = null, $type = CURLPROXY_SOCKS5)
@@ -332,7 +331,7 @@ class S3
 	* invalid request signatures.  It should only be used as a last
 	* resort when the system time cannot be changed.
 	*
-	* @param string $offset Time offset (set to zero to use AWS server time)
+	* @param int $offset Time offset (set to zero to use AWS server time)
 	* @return void
 	*/
 	public static function setTimeCorrectionOffset($offset = 0)
@@ -374,7 +373,7 @@ class S3
 	*/
 	public static function freeSigningKey()
 	{
-		if (self::$__signingKeyResource !== false)
+		if (is_resource(self::$__signingKeyResource))
 			openssl_free_key(self::$__signingKeyResource);
 	}
 
@@ -534,8 +533,8 @@ class S3
 	* Put a bucket
 	*
 	* @param string $bucket Bucket name
-	* @param constant $acl ACL flag
-	* @param string $location Set as "EU" to create buckets hosted in Europe
+	* @param string $acl ACL flag
+	* @param string|false $location Set as "EU" to create buckets hosted in Europe
 	* @return boolean
 	*/
 	public static function putBucket($bucket, $acl = self::ACL_PRIVATE, $location = false)
@@ -614,7 +613,7 @@ class S3
 	* Create input array info for putObject() with a resource
 	*
 	* @param string $resource Input resource to read from
-	* @param integer $bufferSize Input byte size
+	* @param int|false $bufferSize Input byte size
 	* @param string $md5sum MD5 hash to send (optional)
 	* @return array | false
 	*/
@@ -649,11 +648,11 @@ class S3
 	* @param mixed $input Input data
 	* @param string $bucket Bucket name
 	* @param string $uri Object URI
-	* @param constant $acl ACL constant
+	* @param string $acl ACL constant
 	* @param array $metaHeaders Array of x-amz-meta-* headers
 	* @param array $requestHeaders Array of request headers or content type as a string
-	* @param constant $storageClass Storage class constant
-	* @param constant $serverSideEncryption Server-side encryption
+	* @param string $storageClass Storage class constant
+	* @param string $serverSideEncryption Server-side encryption
 	* @return boolean
 	*/
 	public static function putObject($input, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $requestHeaders = array(), $storageClass = self::STORAGE_CLASS_STANDARD, $serverSideEncryption = self::SSE_NONE)
@@ -740,14 +739,14 @@ class S3
 	* @param string $file Input file path
 	* @param string $bucket Bucket name
 	* @param string $uri Object URI
-	* @param constant $acl ACL constant
+	* @param string $acl ACL constant
 	* @param array $metaHeaders Array of x-amz-meta-* headers
 	* @param string $contentType Content type
 	* @return boolean
 	*/
 	public static function putObjectFile($file, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $contentType = null)
 	{
-		return self::putObject(self::inputFile($file), $bucket, $uri, $acl, $metaHeaders, $contentType);
+		return self::putObject(self::inputFile($file), $bucket, $uri, $acl, $metaHeaders, array('type' => $contentType));
 	}
 
 
@@ -757,14 +756,14 @@ class S3
 	* @param string $string Input data
 	* @param string $bucket Bucket name
 	* @param string $uri Object URI
-	* @param constant $acl ACL constant
+	* @param string $acl ACL constant
 	* @param array $metaHeaders Array of x-amz-meta-* headers
 	* @param string $contentType Content type
 	* @return boolean
 	*/
 	public static function putObjectString($string, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $contentType = 'text/plain')
 	{
-		return self::putObject($string, $bucket, $uri, $acl, $metaHeaders, $contentType);
+		return self::putObject($string, $bucket, $uri, $acl, $metaHeaders, array('type' => $contentType));
 	}
 
 
@@ -834,10 +833,10 @@ class S3
 	* @param string $srcUri Source object URI
 	* @param string $bucket Destination bucket name
 	* @param string $uri Destination object URI
-	* @param constant $acl ACL constant
+	* @param string $acl ACL constant
 	* @param array $metaHeaders Optional array of x-amz-meta-* headers
 	* @param array $requestHeaders Optional array of request headers (content type, disposition, etc.)
-	* @param constant $storageClass Storage class constant
+	* @param string $storageClass Storage class constant
 	* @return mixed | false
 	*/
 	public static function copyObject($srcBucket, $srcUri, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $requestHeaders = array(), $storageClass = self::STORAGE_CLASS_STANDARD)
@@ -919,7 +918,7 @@ class S3
 	* @param string $targetPrefix Log prefix (e,g; domain.com-)
 	* @return boolean
 	*/
-	public static function setBucketLogging($bucket, $targetBucket, $targetPrefix = null)
+	public static function setBucketLogging($bucket, $targetBucket = null, $targetPrefix = null)
 	{
 		// The S3 log delivery group has to be added to the target bucket's ACP
 		if ($targetBucket !== null && ($acp = self::getAccessControlPolicy($targetBucket, '')) !== false)
@@ -1257,7 +1256,7 @@ class S3
 	*
 	* @param string $bucket Bucket name
 	* @param string $uriPrefix Object URI prefix
-	* @param constant $acl ACL constant
+	* @param string $acl ACL constant
 	* @param integer $lifetime Lifetime in seconds
 	* @param integer $maxFileSize Maximum filesize in bytes (default 5MB)
 	* @param string $successRedirect Redirect URL or 200 / 201 status code
@@ -1270,13 +1269,13 @@ class S3
 	$maxFileSize = 5242880, $successRedirect = "201", $amzHeaders = array(), $headers = array(), $flashVars = false)
 	{
 		// Create policy object
-		$policy = new stdClass;
+		$policy = new \stdClass;
 		$policy->expiration = gmdate('Y-m-d\TH:i:s\Z', (self::__getTime() + $lifetime));
 		$policy->conditions = array();
-		$obj = new stdClass; $obj->bucket = $bucket; array_push($policy->conditions, $obj);
-		$obj = new stdClass; $obj->acl = $acl; array_push($policy->conditions, $obj);
+		$obj = new \stdClass; $obj->bucket = $bucket; array_push($policy->conditions, $obj);
+		$obj = new \stdClass; $obj->acl = $acl; array_push($policy->conditions, $obj);
 
-		$obj = new stdClass; // 200 for non-redirect uploads
+		$obj = new \stdClass; // 200 for non-redirect uploads
 		if (is_numeric($successRedirect) && in_array((int)$successRedirect, array(200, 201)))
 			$obj->success_action_status = (string)$successRedirect;
 		else // URL
@@ -1292,7 +1291,7 @@ class S3
 			array_push($policy->conditions, array('starts-with', '$'.$headerKey, ''));
 		foreach ($amzHeaders as $headerKey => $headerVal)
 		{
-			$obj = new stdClass;
+			$obj = new \stdClass;
 			$obj->{$headerKey} = (string)$headerVal;
 			array_push($policy->conditions, $obj);
 		}
@@ -1300,7 +1299,7 @@ class S3
 		$policy = base64_encode(str_replace('\/', '/', json_encode($policy)));
 
 		// Create parameters
-		$params = new stdClass;
+		$params = new \stdClass;
 		$params->AWSAccessKeyId = self::$__accessKey;
 		$params->key = $uriPrefix.'${filename}';
 		$params->acl = $acl;
@@ -1364,7 +1363,7 @@ class S3
 			self::__triggerError(sprintf("S3::createDistribution({$bucket}, ".(int)$enabled.", [], '$comment'): [%s] %s",
 			$rest->error['code'], $rest->error['message']), __FILE__, __LINE__);
 			return false;
-		} elseif ($rest->body instanceof SimpleXMLElement)
+		} elseif ($rest->body instanceof \SimpleXMLElement)
 			return self::__parseCloudFrontDistributionConfig($rest->body);
 		return false;
 	}
@@ -1400,7 +1399,7 @@ class S3
 			$rest->error['code'], $rest->error['message']), __FILE__, __LINE__);
 			return false;
 		}
-		elseif ($rest->body instanceof SimpleXMLElement)
+		elseif ($rest->body instanceof \SimpleXMLElement)
 		{
 			$dist = self::__parseCloudFrontDistributionConfig($rest->body);
 			$dist['hash'] = $rest->headers['hash'];
@@ -1527,7 +1526,7 @@ class S3
 			$rest->error['code'], $rest->error['message']), __FILE__, __LINE__);
 			return false;
 		}
-		elseif ($rest->body instanceof SimpleXMLElement && isset($rest->body->DistributionSummary))
+		elseif ($rest->body instanceof \SimpleXMLElement && isset($rest->body->DistributionSummary))
 		{
 			$list = array();
 			if (isset($rest->body->Marker, $rest->body->MaxItems, $rest->body->IsTruncated))
@@ -1630,7 +1629,7 @@ class S3
 	* @param int $callerReference
 	* @return string
 	*/
-	private static function __getCloudFrontInvalidationBatchXML($paths, $callerReference = '0')
+	private static function __getCloudFrontInvalidationBatchXML($paths, $callerReference = 0)
 	{
 		$dom = new DOMDocument('1.0', 'UTF-8');
 		$dom->formatOutput = true;
@@ -1683,7 +1682,7 @@ class S3
 			$rest->error['code'], $rest->error['message']), E_USER_WARNING);
 			return false;
 		}
-		elseif ($rest->body instanceof SimpleXMLElement && isset($rest->body->InvalidationSummary))
+		elseif ($rest->body instanceof \SimpleXMLElement && isset($rest->body->InvalidationSummary))
 		{
 			$list = array();
 			foreach ($rest->body->InvalidationSummary as $summary)
