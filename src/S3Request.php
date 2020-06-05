@@ -383,6 +383,10 @@ final class S3Request
 		@curl_close($curl);
 
 		// Parse body into XML
+		if (!isset($this->response->headers['type']) && preg_match("/^\<\?xml /", $this->response->body)) {
+			$this->response->headers['type'] = 'application/xml';
+		}
+
 		if ($this->response->error === false && isset($this->response->headers['type']) &&
 		$this->response->headers['type'] == 'application/xml' && isset($this->response->body))
 		{
